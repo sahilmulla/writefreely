@@ -788,7 +788,7 @@ func (db *datastore) UpdateOwnedPost(post *AuthenticatedPost, userID int64) erro
 		params = append(params, post.Font)
 	}
 	if post.Created != nil {
-		createTime, err := time.Parse(postMetaDateFormat, *post.Created)
+		createTime, err := time.Parse("2006-01-02T15:04:05Z", *post.Created)
 		if err != nil {
 			log.Error("Unable to parse Created date: %v", err)
 			return fmt.Errorf("That's the incorrect format for Created date.")
