@@ -535,7 +535,7 @@ func handleFetchCollectionInbox(app *App, w http.ResponseWriter, r *http.Request
 		}
 
 		// Add like
-		_, err = t.Exec("INSERT INTO remote_likes (post_id, remote_user_id, created) VALUES (?, ?, NOW())", likePostID, remoteUserID)
+		_, err = t.Exec("INSERT INTO remote_likes (post_id, remote_user_id, created) VALUES (?, ?, "+app.db.now()+")", likePostID, remoteUserID)
 		if err != nil {
 			if !app.db.isDuplicateKeyErr(err) {
 				t.Rollback()
