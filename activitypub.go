@@ -573,7 +573,7 @@ func handleFetchCollectionInbox(app *App, w http.ResponseWriter, r *http.Request
 			remoteUserID, err = apAddRemoteUser(app, t, fullActor)
 		}
 
-		// Add follow
+		// Remove like
 		_, err = t.Exec("DELETE FROM remote_likes WHERE post_id = ? AND remote_user_id = ?", unlikePostID, remoteUserID)
 		if err != nil {
 			t.Rollback()
