@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gosimple/slug"
 	"github.com/guregu/null"
 	"github.com/guregu/null/zero"
 	"github.com/kylemcc/twitter-text-go/extract"
@@ -30,7 +31,6 @@ import (
 	stripmd "github.com/writeas/go-strip-markdown/v2"
 	"github.com/writeas/impart"
 	"github.com/writeas/monday"
-	"github.com/writeas/slug"
 	"github.com/writeas/web-core/activitystreams"
 	"github.com/writeas/web-core/bots"
 	"github.com/writeas/web-core/converter"
@@ -105,6 +105,7 @@ type (
 		Created        time.Time     `db:"created" json:"created"`
 		Updated        time.Time     `db:"updated" json:"updated"`
 		ViewCount      int64         `db:"view_count" json:"-"`
+		LikeCount      int64         `db:"like_count" json:"likes"`
 		Title          zero.String   `db:"title" json:"title"`
 		HTMLTitle      template.HTML `db:"title" json:"-"`
 		Content        string        `db:"content" json:"body"`
@@ -127,6 +128,7 @@ type (
 		IsTopLevel  bool           `json:"-"`
 		DisplayDate string         `json:"-"`
 		Views       int64          `json:"views"`
+		Likes       int64          `json:"likes"`
 		Owner       *PublicUser    `json:"-"`
 		IsOwner     bool           `json:"-"`
 		URL         string         `json:"url,omitempty"`
@@ -1184,6 +1186,7 @@ func fetchPostProperty(app *App, w http.ResponseWriter, r *http.Request) error {
 func (p *Post) processPost() PublicPost {
 	res := &PublicPost{Post: p, Views: 0}
 	res.Views = p.ViewCount
+	res.Likes = p.LikeCount
 	// TODO: move to own function
 	loc := monday.FuzzyLocale(p.Language.String)
 	res.DisplayDate = monday.Format(p.Created, monday.LongFormatsByLocale[loc], loc)
