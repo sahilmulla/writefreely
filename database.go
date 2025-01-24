@@ -14,11 +14,12 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/writeas/monday"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/writeas/monday"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/writeas/web-core/silobridge"
@@ -116,6 +117,7 @@ type writestore interface {
 	DispersePosts(userID int64, postIDs []string) (*[]ClaimPostResult, error)
 	ClaimPosts(cfg *config.Config, userID int64, collAlias string, posts *[]ClaimPostRequest) (*[]ClaimPostResult, error)
 
+	GetPostLikeCounts(postID string) (int64, error)
 	GetPostsCount(c *CollectionObj, includeFuture bool) error
 	GetPosts(cfg *config.Config, c *Collection, page int, includeFuture, forceRecentFirst, includePinned bool, contentType PostType) (*[]PublicPost, error)
 	GetAllPostsTaggedIDs(c *Collection, tag string, includeFuture bool) ([]string, error)
@@ -1175,6 +1177,12 @@ func (db *datastore) GetPost(id string, collectionID int64) (*PublicPost, error)
 		return nil, ErrPostUnpublished
 	}
 
+	// Get additional information needed before processing post data
+	p.LikeCount, err = db.GetPostLikeCounts(p.ID)
+	if err != nil {
+		return nil, err
+	}
+
 	res := p.processPost()
 	if ownerName.Valid {
 		res.Owner = &PublicUser{Username: ownerName.String}
@@ -1235,6 +1243,18 @@ func (db *datastore) GetPostProperty(id string, collectionID int64, property str
 	}
 
 	return res, nil
+}
+
+func (db *datastore) GetPostLikeCounts(postID string) (int64, error) {
+	var count int64
+	err := db.QueryRow("SELECT COUNT(*) FROM remote_likes WHERE post_id = ?", postID).Scan(&count)
+	switch {
+	case err == sql.ErrNoRows:
+		count = 0
+	case err != nil:
+		return 0, err
+	}
+	return count, nil
 }
 
 // GetPostsCount modifies the CollectionObj to include the correct number of
