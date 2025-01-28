@@ -69,6 +69,7 @@ For common platforms, start with our [pre-built binaries](https://github.com/wri
 You can also find WriteFreely in these package repositories, thanks to our wonderful community!
 
 * [Arch User Repository](https://aur.archlinux.org/packages/writefreely/)
+* [Nanos Repository](https://repo.ops.city/v2/packages/eyberg/writefreely/0.15.1/x86_64/show)
 
 ## Documentation
 
